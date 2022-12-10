@@ -6,6 +6,7 @@ require("colors");
 const helmet = require("helmet");
 const routesController = require("./routes/routesController");
 const connectDB = require("./config/db");
+const errorHandler = require("./controllers/errorController");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -22,6 +23,14 @@ if (process.env.NODE_ENV === "development") {
 app.use("/api/v1/auth", routesController.authRouter);
 app.use("/api/v1/tours", routesController.tourRouter);
 app.use("/api/v1/users", routesController.userRouter);
+app.all("*", (req, res, next) => {
+  res.status(404).json({
+    status: "Fail",
+    message: `${req.originalUrl} not found`,
+  });
+});
+
+app.use(errorHandler);
 
 app.listen(port, async () => {
   console.log(`Server is running on http://localhost:${port}`.cyan.underline);
