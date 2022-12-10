@@ -1,4 +1,5 @@
 const Tour = require("../models/Tour");
+const APIFeatues = require("../utils/apiFeatures");
 const catchAsync = require("../utils/catchAsync");
 
 // @desc    Create new tour
@@ -35,8 +36,13 @@ const getTour = catchAsync(async (req, res, next) => {
 // @route   GET /api/v1/tours
 // @access  Private
 const getAllTours = catchAsync(async (req, res, next) => {
-  const tours = await Tour.find();
-
+  const apiFeatures = new APIFeatues(Tour.find(), req.query)
+    .search()
+    .filter()
+    .limitFields()
+    .sort()
+    .paginate();
+  const tours = await apiFeatures.query;
   res.status(200).json({
     status: "success",
     results: tours.length,
@@ -79,10 +85,60 @@ const deleteTour = catchAsync(async (req, res, next) => {
   });
 });
 
+const getTourStats = catchAsync(async (req, res, next) => {
+  const stats = await Tour.aggregate([
+    { $match: { ratingAverage: { $gte: 4.5 } } },
+    {
+      $group: {
+        _id: "$difficulty",
+        numOfRating: { $sum: "$ratingQuantity" },
+        numOfTours: { $sum: 1 },
+        avgRating: { $avg: "$ratingAverage" },
+        avgPrice: { $avg: "$price" },
+        minPrice: { $min: "$price" },
+        maxPrice: { $max: "$price" },
+      },
+    },
+    { $sort: { avgPrice: 1 } },
+  ]);
+  console.log(stats);
+  res.status(200).json({
+    status: "success",
+    data: {
+      stats,
+    },
+  });
+});
+
+// const getMonthlyPlan = catchAsync(async (req, res, next) => {
+//   const year = req.params.year * 1;
+//   const plan = await Tour.aggregate([
+//     {
+//       $unwind: "$startDates",
+//     },
+//     {
+//       $match: {
+//         startDates: {
+//           $gte: new Date(`year-01-01`),
+//           $lte: new Date(`year-12-31`),
+//         },
+//       },
+//     },
+//   ]);
+//   res.status(200).json({
+//     status: "success",
+//     data: {
+//       plan,
+//     },
+//   });
+// });
+
 module.exports = {
   createTour,
   getTour,
   getAllTours,
   updateTour,
   deleteTour,
+  getTourStats,
+  // getMonthlyPlan,
 };

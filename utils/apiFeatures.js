@@ -25,7 +25,7 @@ class APIFeatues {
     });
     let queryStr = JSON.stringify(queryStrObj);
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
-    this.query = this.query.find(JSON.parse());
+    this.query = this.query.find(JSON.parse(queryStr));
     return this;
   }
 
@@ -45,9 +45,9 @@ class APIFeatues {
 
   paginate() {
     const currentPage = this.queryStr.page * 1 || 1;
-    const limit = this.queryStr.limit * 1 || 24;
+    const limit = this.queryStr.limit * 1 || 10;
     const skip = (currentPage - 1) * limit;
-    this.query = thiq.query.limit(limit).skip(skip);
+    this.query = this.query.limit(limit).skip(skip);
     return this;
   }
 }
