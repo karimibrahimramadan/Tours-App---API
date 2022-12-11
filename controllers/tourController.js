@@ -1,5 +1,6 @@
 const Tour = require("../models/Tour");
 const APIFeatues = require("../utils/apiFeatures");
+const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
 
 // @desc    Create new tour
@@ -9,7 +10,7 @@ const createTour = catchAsync(async (req, res, next) => {
   const newTour = new Tour(req.body);
   const savedTour = await newTour.save();
   res.status(201).json({
-    status: "success",
+    status: "Success",
     message: "Tour created",
     data: {
       savedTour,
@@ -23,9 +24,10 @@ const createTour = catchAsync(async (req, res, next) => {
 const getTour = catchAsync(async (req, res, next) => {
   const tour = await Tour.findById(req.params.tourId);
   if (!tour) {
+    return next(new AppError("Tour not found", 404));
   }
   res.status(200).json({
-    status: "success",
+    status: "Success",
     data: {
       tour,
     },
@@ -44,7 +46,7 @@ const getAllTours = catchAsync(async (req, res, next) => {
     .paginate();
   const tours = await apiFeatures.query;
   res.status(200).json({
-    status: "success",
+    status: "Success",
     results: tours.length,
     data: {
       tours,
@@ -62,9 +64,10 @@ const updateTour = catchAsync(async (req, res, next) => {
     { new: true }
   );
   if (!tour) {
+    return next(new AppError("Tour not found", 404));
   }
   res.status(200).json({
-    status: "success",
+    status: "Success",
     message: "Tour updated",
     data: {
       tour,
@@ -78,9 +81,10 @@ const updateTour = catchAsync(async (req, res, next) => {
 const deleteTour = catchAsync(async (req, res, next) => {
   const tour = await Tour.findByIdAndDelete(req.params.tourId);
   if (!tour) {
+    return next(new AppError("Tour not found", 404));
   }
   res.status(204).json({
-    status: "success",
+    status: "Success",
     message: "Tour deleted",
   });
 });
@@ -103,7 +107,7 @@ const getTourStats = catchAsync(async (req, res, next) => {
   ]);
   console.log(stats);
   res.status(200).json({
-    status: "success",
+    status: "Success",
     data: {
       stats,
     },
@@ -126,7 +130,7 @@ const getTourStats = catchAsync(async (req, res, next) => {
 //     },
 //   ]);
 //   res.status(200).json({
-//     status: "success",
+//     status: "Success",
 //     data: {
 //       plan,
 //     },

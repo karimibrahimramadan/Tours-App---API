@@ -1,15 +1,12 @@
 const express = require("express");
-require("dotenv").config();
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 require("colors");
 const helmet = require("helmet");
 const routesController = require("./routes/routesController");
-const connectDB = require("./config/db");
 const errorHandler = require("./controllers/errorController");
 
 const app = express();
-const port = process.env.PORT || 3000;
 
 // middlewares
 app.use(helmet());
@@ -32,7 +29,4 @@ app.all("*", (req, res, next) => {
 
 app.use(errorHandler);
 
-app.listen(port, async () => {
-  console.log(`Server is running on http://localhost:${port}`.cyan.underline);
-  await connectDB();
-});
+module.exports = app;
