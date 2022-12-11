@@ -2,7 +2,7 @@ const router = require("express").Router();
 const tourController = require("../../controllers/tourController");
 const { protect } = require("../../middlewares/auth");
 
-// router.use(protect);
+router.use(protect);
 
 router.post("/", tourController.createTour);
 

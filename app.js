@@ -17,7 +17,6 @@ if (process.env.NODE_ENV === "development") {
 }
 
 // routes
-app.use("/api/v1/auth", routesController.authRouter);
 app.use("/api/v1/tours", routesController.tourRouter);
 app.use("/api/v1/users", routesController.userRouter);
 app.all("*", (req, res, next) => {

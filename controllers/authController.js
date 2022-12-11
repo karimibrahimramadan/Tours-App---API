@@ -5,10 +5,13 @@ const jwt = require("jsonwebtoken");
 const AppError = require("../utils/appError");
 
 // @desc    Register new user
-// @route   POST /api/v1/auth/signup
+// @route   POST /api/v1/users/signup
 // @access  Public
 const signup = catchAsync(async (req, res, next) => {
-  const newUser = new User(req.body);
+  const { name, email, password } = req.body;
+  console.log(req.headers);
+
+  const newUser = new User({ name, email, password });
   const savedUser = await newUser.save();
   const token = savedUser.getJwtToken();
   const url = `${req.protocol}://${req.get(
@@ -27,7 +30,7 @@ const signup = catchAsync(async (req, res, next) => {
 });
 
 // @desc    Confrim user's email
-// @route   GET /api/v1/auth/confirm-email/:token
+// @route   GET /api/v1/users/confirm-email/:token
 // @access  Private
 const confirmEmail = catchAsync(async (req, res, next) => {
   const token = req.params.token;
@@ -54,7 +57,7 @@ const confirmEmail = catchAsync(async (req, res, next) => {
 });
 
 // @desc    Login user
-// @route   POST /api/v1/auth/login
+// @route   POST /api/v1/users/login
 // @access  Public
 const login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
@@ -70,7 +73,12 @@ const login = catchAsync(async (req, res, next) => {
     return next(new AppError("Email or password is incorrect", 400));
   }
   const token = user.getJwtToken();
-  res.cookie("access_token", token, { httpOnly: true }).status(200).json({
+  // res.cookie("access_token", token, { httpOnly: true }).status(200).json({
+  //   status: "Success",
+  //   message: "Logged in successfully",
+  //   token,
+  // });
+  res.status(200).json({
     status: "Success",
     message: "Logged in successfully",
     token,
@@ -78,7 +86,7 @@ const login = catchAsync(async (req, res, next) => {
 });
 
 // @desc    Update user's password
-// @route   PATCH /api/v1/auth/me/updatepassword
+// @route   PATCH /api/v1/users/me/updatepassword
 // @access  Private
 const updatePassword = catchAsync(async (req, res, next) => {
   const { password, newPassword } = req.body;

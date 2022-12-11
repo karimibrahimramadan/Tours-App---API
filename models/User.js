@@ -4,11 +4,21 @@ const jwt = require("jsonwebtoken");
 
 const userSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true, trim: true },
-    email: { type: String, required: true, trim: true, unique: true },
-    password: { type: String, required: true, select: false },
+    name: {
+      type: String,
+      required: [true, "Please provide your name"],
+      trim: true,
+    },
+    email: {
+      type: String,
+      required: [true, "Please provide your email"],
+      lowercase: true,
+      trim: true,
+      unique: true,
+    },
+    password: { type: String, required: true, select: false, minlength: 8 },
     confirmEmail: { type: Boolean, default: false },
-    profilePic: String,
+    profilePic: { type: String, default: "" },
     phoneNumber: String,
     role: { type: String, default: "user", enum: ["admin", "guide", "user"] },
     active: { type: Boolean, default: true },
@@ -20,6 +30,9 @@ const userSchema = new mongoose.Schema(
 );
 
 userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) {
+    return next();
+  }
   const salt = await bcrypt.genSalt(Number(process.env.SALT_ROUNDS));
   this.password = await bcrypt.hash(this.password, salt);
   next();
@@ -44,6 +57,18 @@ userSchema.methods.comparePassword = async function (inputPassword) {
 userSchema.methods.hashPassword = async function (inputPassword) {
   const salt = await bcrypt.genSalt(Number(process.env.SALT_ROUNDS));
   return await bcrypt.hash(inputPassword, salt);
+};
+
+userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
+  if (this.passwordChangedAt < JWTTimestamp) {
+    const changedTimestamp = parseInt(
+      this.passwordChangedAt.getDate() / 1000,
+      10
+    );
+    return JWTTimestamp < changedTimestamp;
+  }
+
+  return false;
 };
 
 const User = mongoose.model("User", userSchema);
