@@ -3,6 +3,7 @@ const catchAsync = require("../utils/catchAsync");
 const sendEmail = require("../utils/sendEmail");
 const jwt = require("jsonwebtoken");
 const AppError = require("../utils/appError");
+const crypto = require("crypto");
 
 // @desc    Register new user
 // @route   POST /api/v1/users/signup
@@ -13,7 +14,7 @@ const signup = catchAsync(async (req, res, next) => {
 
   const newUser = new User({ name, email, password });
   const savedUser = await newUser.save();
-  const token = savedUser.getJwtToken();
+  const token = savedUser.getEmailJwtToken();
   const url = `${req.protocol}://${req.get(
     "host"
   )}/api/v1/auth/confirm-email/${token}`;
@@ -21,7 +22,7 @@ const signup = catchAsync(async (req, res, next) => {
   sendEmail(savedUser.email, message, "Verify Email");
   res.status(201).json({
     status: "Success",
-    message: "User created",
+    message: "User has been created",
     data: {
       user: savedUser,
       token,
@@ -73,16 +74,16 @@ const login = catchAsync(async (req, res, next) => {
     return next(new AppError("Email or password is incorrect", 400));
   }
   const token = user.getJwtToken();
-  // res.cookie("access_token", token, { httpOnly: true }).status(200).json({
-  //   status: "Success",
-  //   message: "Logged in successfully",
-  //   token,
-  // });
-  res.status(200).json({
+  res.cookie("access_token", token, { httpOnly: true }).status(200).json({
     status: "Success",
     message: "Logged in successfully",
     token,
   });
+  // res.status(200).json({
+  //   status: "Success",
+  //   message: "Logged in successfully",
+  //   token,
+  // });
 });
 
 // @desc    Update user's password
@@ -108,7 +109,73 @@ const updatePassword = catchAsync(async (req, res, next) => {
   const token = user.getJwtToken();
   res.cookie("access_token", token, { httpOnly: true }).status(200).json({
     status: "Success",
-    message: "Password updated",
+    message: "Password has been updated",
+  });
+});
+
+// @desc    Forgot password
+// @route   PATCH /api/v1/users/forgotpassword
+// @access  Public
+const forgotPassword = catchAsync(async (req, res, next) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email }).select("+password");
+  if (!user) {
+    return next(new AppError("User not found", 404));
+  }
+  const token = user.createPasswordResetToken();
+  // await user.save({ validateBeforeSave: false });
+  await user.save();
+  const url = `${req.protocol}://${req.get(
+    "host"
+  )}/api/v1/users/resetpassword/${token}`;
+  const message = `<p>Use this link to reset your password</p><br><a href='${url}'>Reset Password</a>`;
+  sendEmail(user.email, message, "Reset Password");
+  res.status(200).json({
+    status: "Success",
+    message: "Email has been sent",
+    data: {
+      token,
+    },
+  });
+});
+
+// @desc    Reset password
+// @route   PATCH /api/v1/users/resetpassword/:token
+// @access  Public
+const resetPassword = catchAsync(async (req, res, next) => {
+  const { token } = req.params;
+  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpire: { $gt: Date.now() },
+  }).select("+password");
+  if (!user) {
+    return next(new AppError("Token is invalid or has expired", 400));
+  }
+  const { password } = req.body;
+  const match = await user.comparePassword(password);
+  if (match) {
+    return next(new AppError("Use new password", 400));
+  }
+  const hashedPassword = await user.hashPassword(password);
+  const updatedUser = await User.findOneAndUpdate(
+    {
+      passwordResetToken: hashedToken,
+      passwordResetExpire: { $gt: Date.now() },
+    },
+    {
+      $set: {
+        password: hashedPassword,
+        passwordResetToken: undefined,
+        passwordResetExpire: undefined,
+        passwordChangedAt: Date.now(),
+      },
+    },
+    { new: true }
+  );
+  res.status(200).json({
+    status: "Success",
+    message: "Password has been reset",
   });
 });
 
@@ -117,4 +184,6 @@ module.exports = {
   confirmEmail,
   login,
   updatePassword,
+  forgotPassword,
+  resetPassword,
 };

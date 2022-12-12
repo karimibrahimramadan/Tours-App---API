@@ -38,7 +38,7 @@ const protect = catchAsync(async (req, res, next) => {
 const restrictTo = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
-      return next(new AppError("Authorization denied", 401));
+      return next(new AppError("Authorization denied", 403));
     } else {
       next();
     }
