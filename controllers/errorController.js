@@ -6,7 +6,7 @@ const handleCastErrorDB = (err) => {
 };
 
 const handleDuplicateFieldsDB = function (err) {
-  const message = `Invalid ${err.path}: ${err.value}`;
+  const message = `Duplicate field value: ${err.keyValue.name}. Please use another value`;
   return new AppError(message, 400);
 };
 

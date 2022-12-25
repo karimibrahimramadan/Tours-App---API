@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema(
       default: "user",
       enum: ["admin", "guide", "user", "lead-guide"],
     },
-    active: { type: Boolean, default: true },
+    active: { type: Boolean, default: true, select: false },
     passwordResetToken: String,
     passwordResetExpire: Date,
     passwordChangedAt: Date,
@@ -65,7 +65,7 @@ userSchema.methods.hashPassword = async function (inputPassword) {
 };
 
 userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
-  if (this.passwordChangedAt < JWTTimestamp) {
+  if (this.passwordChangedAt) {
     const changedTimestamp = parseInt(
       this.passwordChangedAt.getDate() / 1000,
       10
@@ -85,6 +85,11 @@ userSchema.methods.createPasswordResetToken = function () {
   this.passwordResetExpire = Date.now() + 10 * 60 * 1000;
   return resetToken;
 };
+
+userSchema.pre(/^find/, function (next) {
+  this.find({ active: { $ne: false } });
+  next();
+});
 
 const User = mongoose.model("User", userSchema);
 

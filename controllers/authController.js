@@ -73,6 +73,13 @@ const login = catchAsync(async (req, res, next) => {
   if (!match) {
     return next(new AppError("Email or password is incorrect", 400));
   }
+  if (!user.active) {
+    const updatedUser = await User.findOneAndUpdate(
+      { email },
+      { $set: { active: true } },
+      { new: true }
+    );
+  }
   const token = user.getJwtToken();
   res.cookie("access_token", token, { httpOnly: true }).status(200).json({
     status: "Success",
