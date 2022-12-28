@@ -23,6 +23,7 @@ const createTour = catchAsync(async (req, res, next) => {
 // @access  Private
 const getTour = catchAsync(async (req, res, next) => {
   const tour = await Tour.findById(req.params.tourId);
+  // .populate("reviews");
   if (!tour) {
     return next(new AppError("Tour not found", 404));
   }

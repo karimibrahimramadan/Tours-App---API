@@ -38,12 +38,42 @@ const tourSchema = new mongoose.Schema(
     images: [String],
     startDates: [Date],
     secretTour: { type: Boolean, default: false, select: false },
+    startLocation: {
+      type: {
+        type: String,
+        default: "Point",
+        enum: ["Point"],
+      },
+      coordinates: [Number],
+      address: String,
+      description: String,
+    },
+    locations: [
+      {
+        type: {
+          type: String,
+          default: "Point",
+          enum: ["Point"],
+        },
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: Number,
+      },
+    ],
+    guides: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   },
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
 tourSchema.virtual("durationWeeks").get(function () {
   return this.duration / 7;
+});
+
+tourSchema.virtual("reviews", {
+  ref: "Review",
+  localField: "_id",
+  foreignField: "tour",
 });
 
 tourSchema.pre("save", function (next) {

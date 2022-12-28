@@ -33,6 +33,7 @@ app.use(xss());
 app.use(hpp());
 
 // routes
+app.use("/api/v1/reviews", routesController.reviewRouter);
 app.use("/api/v1/tours", routesController.tourRouter);
 app.use("/api/v1/users", routesController.userRouter);
 app.all("*", (req, res, next) => {
