@@ -31,10 +31,7 @@ const tourSchema = new mongoose.Schema(
     ratingAverage: { type: Number, default: 0 },
     ratingQuantity: { type: Number, default: 0 },
     guides: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-    imageCover: {
-      type: String,
-      required: [true, "A tour must have a cover image"],
-    },
+    imageCover: String,
     images: [String],
     startDates: [Date],
     secretTour: { type: Boolean, default: false, select: false },

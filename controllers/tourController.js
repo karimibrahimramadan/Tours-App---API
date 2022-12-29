@@ -8,6 +8,16 @@ const factory = require("./handlerFactory");
 // @route   POST /api/v1/tours
 // @access  Private
 const createTour = catchAsync(async (req, res, next) => {
+  req.body.imageCover = `${req.protocol}://${req.get("host")}/${req.dest}/${
+    req.files.imageCover[0].filename
+  }`;
+  let images = [];
+  req.files.images.forEach((file) => {
+    images.push(
+      `${req.protocol}://${req.get("host")}/${req.dest}/${file.filename}`
+    );
+  });
+  req.body.images = images;
   const newTour = new Tour(req.body);
   const savedTour = await newTour.save();
   res.status(201).json({

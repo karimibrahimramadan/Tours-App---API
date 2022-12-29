@@ -4,6 +4,7 @@ const { protect } = require("../../middlewares/auth");
 const validation = require("../../middlewares/validation");
 const validators = require("./tourValidation");
 const reviewRouter = require("../review/review");
+const { upload, fileValidation } = require("../../utils/multer");
 
 router.use("/:tourId/reviews", reviewRouter);
 
@@ -11,6 +12,10 @@ router.use(protect);
 
 router.post(
   "/",
+  upload("tours", fileValidation.image).fields([
+    { name: "imageCover", maxCount: 1 },
+    { name: "images", maxCount: 10 },
+  ]),
   validation(validators.createTourValidation),
   tourController.createTour
 );

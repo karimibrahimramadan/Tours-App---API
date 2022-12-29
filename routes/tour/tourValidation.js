@@ -12,9 +12,7 @@ const createTourValidation = {
       difficulty: Joi.string().valid("Easy", "Medium", "Hard").required(),
       price: Joi.number().positive().required(),
       priceDiscount: Joi.number().positive(),
-      imageCover: Joi.string().required(),
       secretTour: Joi.boolean().default(false),
-      images: Joi.array().items(Joi.string()),
       startDates: Joi.array().items(Joi.date()),
       startLocation: Joi.object().keys({
         type: Joi.string().valid("Point"),
