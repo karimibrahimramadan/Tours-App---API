@@ -4,10 +4,11 @@ const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
 
 // @desc    Create new review
-// @route   POST /api/v1/reviews
+// @route   POST /api/v1/tours/:tourId/reviews
 // @access  Private
 const createReview = catchAsync(async (req, res, next) => {
   req.body.user = req.user.id;
+  if (!req.body.tour) req.body.tour = req.params.tourId;
   const newReview = new Review(req.body);
   const savedReview = await newReview.save();
   res.status(201).json({
@@ -20,11 +21,11 @@ const createReview = catchAsync(async (req, res, next) => {
 });
 
 // @desc    Update review
-// @route   PATCH /api/v1/reviews/:id
+// @route   PATCH /api/v1/tours/:tourId/reviews/:reviewId
 // @access  Private
 const updateReview = catchAsync(async (req, res, next) => {
   const review = await Review.findByIdAndUpdate(
-    req.params.id,
+    req.params.reviewId,
     { $set: req.body },
     { new: true }
   );
@@ -41,23 +42,25 @@ const updateReview = catchAsync(async (req, res, next) => {
 });
 
 // @desc    Delete review
-// @route   DELETE /api/v1/reviews/:id
+// @route   DELETE /api/v1/tours/:tourId/reviews/:reviewId
 // @access  Private
-// const deleteReview = catchAsync(async (req, res, next) => {
-//   res.status(200).json({
-//     status: "Success",
-//     message: "Review has been updated",
-//     data: {
-//       review: updatedReview,
-//     },
-//   });
-// });
+const deleteReview = catchAsync(async (req, res, next) => {
+  const review = await Review.findByIdAndDelete(req.params.reviewId);
+  if (!review) {
+    return next(new AppError("Review not found", 404));
+  }
+  res.status(204).json({
+    status: "Success",
+    message: "Review has been deleted",
+    data: null,
+  });
+});
 
 // @desc    Get all reviews
-// @route   GET /api/v1/reviews
+// @route   GET /api/v1/tours/:tourId/reviews
 // @access  Public
 const getAllReviews = catchAsync(async (req, res, next) => {
-  const filterObj = req.params.id ? { tour: req.params.id } : {};
+  const filterObj = req.params.tourId ? { tour: req.params.tourId } : {};
   const apiFeatures = new APIFeatues(Review.find(filterObj), req.query)
     .filter()
     .limitFields()
@@ -75,10 +78,10 @@ const getAllReviews = catchAsync(async (req, res, next) => {
 });
 
 // @desc    Get all reviews
-// @route   GET /api/v1/reviews
+// @route   GET /api/v1/tours/:tourId/reviews/:reviewId
 // @access  Public
 const getReview = catchAsync(async (req, res, next) => {
-  const review = await Review.findById(req.params.id);
+  const review = await Review.findById(req.params.reviewId);
   if (!review) {
     return next(new AppError("Review not found", 404));
   }
@@ -95,4 +98,5 @@ module.exports = {
   updateReview,
   getAllReviews,
   getReview,
+  deleteReview,
 };
