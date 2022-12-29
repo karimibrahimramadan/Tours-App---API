@@ -85,12 +85,6 @@ tourSchema.pre("save", function (next) {
   next();
 });
 
-tourSchema.pre("findOneAndUpdate", async function (next) {
-  const hookData = await this.model.findOne(this.getQuery()).select("__v");
-  this.set({ __v: hookData.__v + 1 });
-  next();
-});
-
 tourSchema.pre(/^find/, function (next) {
   this.find({ secretTour: { $ne: true } });
   next();

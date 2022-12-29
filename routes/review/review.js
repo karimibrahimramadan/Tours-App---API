@@ -20,7 +20,7 @@ router.get(
 );
 
 router.get(
-  "/:reviewId",
+  "/:id",
   validation(validators.getReviewValidation),
   reviewController.getReview
 );
@@ -31,10 +31,17 @@ router.get(
 //   reviewController.updateReview
 // );
 
+router.patch("/:id", reviewController.updateReview);
+
 // router.delete(
 //   "/:reviewId",
 //   validation(validators.deleteReviewValidation),
 //   reviewController.deleteReview
 // );
+router.delete(
+  "/:id",
+  validation(validators.deleteReviewValidation),
+  reviewController.deleteReview
+);
 
 module.exports = router;

@@ -71,7 +71,7 @@ const updateTourValidation = {
   params: Joi.object()
     .required()
     .keys({
-      tourId: Joi.string().hex().length(24).required(),
+      id: Joi.string().hex().length(24).required(),
     })
     .options({ allowUnknown: true }),
 };
@@ -80,7 +80,7 @@ const getTourValidation = {
   params: Joi.object()
     .required()
     .keys({
-      tourId: Joi.string().hex().length(24).required(),
+      id: Joi.string().hex().length(24).required(),
     })
     .options({ allowUnknown: true }),
 };
@@ -89,7 +89,7 @@ const deleteTourValidation = {
   params: Joi.object()
     .required()
     .keys({
-      tourId: Joi.string().hex().length(24).required(),
+      id: Joi.string().hex().length(24).required(),
     })
     .options({ allowUnknown: true }),
 };

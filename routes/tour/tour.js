@@ -20,7 +20,7 @@ router.get("/tour-stats", tourController.getTourStats);
 // router.get("/monthly-plan/:year", tourController.getMonthlyPlan);
 
 router.get(
-  "/:tourId",
+  "/:id",
   validation(validators.getTourValidation),
   tourController.getTour
 );
@@ -28,13 +28,13 @@ router.get(
 router.get("/", tourController.getAllTours);
 
 router.patch(
-  "/:tourId",
+  "/:id",
   validation(validators.updateTourValidation),
   tourController.updateTour
 );
 
 router.delete(
-  "/:tourId",
+  "/:id",
   validation(validators.deleteTourValidation),
   tourController.deleteTour
 );
