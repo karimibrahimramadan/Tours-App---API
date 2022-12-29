@@ -1,13 +1,9 @@
 const Tour = require("../models/Tour");
-const APIFeatues = require("../utils/apiFeatures");
 const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
 const factory = require("./handlerFactory");
 
-// @desc    Create new tour
-// @route   POST /api/v1/tours
-// @access  Private
-const createTour = catchAsync(async (req, res, next) => {
+const setTourImagesUrl = (req, res, next) => {
   req.body.imageCover = `${req.protocol}://${req.get("host")}/${req.dest}/${
     req.files.imageCover[0].filename
   }`;
@@ -18,16 +14,13 @@ const createTour = catchAsync(async (req, res, next) => {
     );
   });
   req.body.images = images;
-  const newTour = new Tour(req.body);
-  const savedTour = await newTour.save();
-  res.status(201).json({
-    status: "Success",
-    message: "Tour created",
-    data: {
-      savedTour,
-    },
-  });
-});
+  next();
+};
+
+// @desc    Create new tour
+// @route   POST /api/v1/tours
+// @access  Private
+const createTour = factory.createOne(Tour);
 
 // @desc    Get tour
 // @route   GET /api/v1/tours/:tourId
@@ -105,4 +98,5 @@ module.exports = {
   deleteTour,
   getTourStats,
   // getMonthlyPlan,
+  setTourImagesUrl,
 };

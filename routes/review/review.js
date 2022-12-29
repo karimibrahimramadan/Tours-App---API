@@ -10,6 +10,7 @@ router.post(
   "/",
   validation(validators.createReviewValidation),
   restrictTo("user"),
+  reviewController.setUserAndTourIds,
   reviewController.createReview
 );
 
@@ -25,21 +26,16 @@ router.get(
   reviewController.getReview
 );
 
-// router.patch(
-//   "/:reviewId",
-//   restrictTo("admin", "user"),
-//   reviewController.updateReview
-// );
+router.patch(
+  "/:id",
+  restrictTo("admin", "user"),
+  validation(validators.upateReviewValidation),
+  reviewController.updateReview
+);
 
-router.patch("/:id", reviewController.updateReview);
-
-// router.delete(
-//   "/:reviewId",
-//   validation(validators.deleteReviewValidation),
-//   reviewController.deleteReview
-// );
 router.delete(
   "/:id",
+  restrictTo("admin", "user"),
   validation(validators.deleteReviewValidation),
   reviewController.deleteReview
 );

@@ -25,7 +25,7 @@ const getOne = (Model) => {
     res.status(200).json({
       status: "Success",
       data: {
-        doc,
+        data: doc,
       },
     });
   });
@@ -45,7 +45,7 @@ const getAll = (Model) => {
       status: "Success",
       results: docs.length,
       data: {
-        docs,
+        data: docs,
       },
     });
   });
@@ -65,7 +65,21 @@ const updateOne = (Model) => {
       status: "Success",
       message: "Document has been updated",
       data: {
-        doc,
+        data: doc,
+      },
+    });
+  });
+};
+
+const createOne = (Model) => {
+  return catchAsync(async (req, res, next) => {
+    const newDoc = new Model(req.body);
+    const savedDoc = await newDoc.save();
+    res.status(201).json({
+      status: "Success",
+      message: "Document has been created",
+      data: {
+        data: savedDoc,
       },
     });
   });
@@ -76,4 +90,5 @@ module.exports = {
   getOne,
   getAll,
   updateOne,
+  createOne,
 };

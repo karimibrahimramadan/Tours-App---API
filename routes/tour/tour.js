@@ -17,6 +17,7 @@ router.post(
     { name: "images", maxCount: 10 },
   ]),
   validation(validators.createTourValidation),
+  tourController.setTourImagesUrl,
   tourController.createTour
 );
 
